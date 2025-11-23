@@ -142,7 +142,7 @@ onMount(() => {
 });
 </script>
 
-<div class="max-w-4xl mx-auto space-y-6">
+<div class="space-y-6">
   <div class="flex items-center gap-4">
     <Button variant="outline" onclick={() => goto("/")}>
       Back to Topics

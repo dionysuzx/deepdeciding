@@ -66,39 +66,34 @@ function formatAddress(address: string) {
 {#if detailed}
   <Card.Root>
     <CardHeader>
-      <div class="flex items-start justify-between gap-4">
-        <div class="flex-1">
-          <div class="flex items-start gap-2 mb-2">
-            <CardTitle class={detailed ? "text-3xl flex-1" : "flex-1"}>{title}</CardTitle>
-            {#if bounty !== null && bounty > 0}
-              <Badge class="bg-green-600 hover:bg-green-700 text-white shrink-0">
-                {bounty} ETH
-              </Badge>
-            {/if}
-          </div>
-          <CardDescription>
-            <div class="space-y-1">
-              <p>Created by {formatAddress(creator_address)}</p>
-              <p>{formatDate(created_at, true)}</p>
-            </div>
-          </CardDescription>
-        </div>
-
-        {#if showActions}
-          <div class="flex gap-2 shrink-0">
-            <Button variant="outline" onclick={onEdit}>
-              Edit
-            </Button>
-            <Button variant="destructive" onclick={onDelete} disabled={deleting}>
-              {deleting ? "Deleting..." : "Delete"}
-            </Button>
-          </div>
+      <div class="flex items-start justify-between gap-2">
+        <CardTitle class="text-3xl flex-1">{title}</CardTitle>
+        {#if bounty !== null && bounty > 0}
+          <Badge class="bg-green-600 hover:bg-green-700 text-white shrink-0">
+            {bounty} ETH
+          </Badge>
         {/if}
       </div>
+      <CardDescription class="space-y-2">
+        <p class="text-lg">{description}</p>
+        <div class="text-xs text-muted-foreground flex items-center justify-between">
+          <span>By {formatAddress(creator_address)}</span>
+          <span>{formatDate(created_at)}</span>
+        </div>
+      </CardDescription>
     </CardHeader>
-    <CardContent>
-      <p class="text-lg">{description}</p>
-    </CardContent>
+    {#if showActions}
+      <CardContent>
+        <div class="flex gap-2">
+          <Button variant="outline" onclick={onEdit}>
+            Edit
+          </Button>
+          <Button variant="destructive" onclick={onDelete} disabled={deleting}>
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        </div>
+      </CardContent>
+    {/if}
   </Card.Root>
 {:else}
   <a href="/topics/{id}" class="block transition-transform hover:scale-[1.02]">
