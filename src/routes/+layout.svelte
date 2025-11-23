@@ -55,7 +55,18 @@ function handleDisconnect() {
 
     <footer class="border-t mt-auto">
         <div class="container mx-auto px-4 py-4 text-sm text-muted-foreground">
-            <p>Accelerating Ethereum social consensus</p>
+            <div class="flex items-center justify-between gap-4">
+                <p>Accelerating Ethereum social consensus</p>
+                <a
+                    href="https://github.com/futurekittylabs/deep-sentiment"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="hover:text-foreground transition-colors"
+                    aria-label="View source on GitHub"
+                >
+                    GitHub
+                </a>
+            </div>
         </div>
     </footer>
 </div>
