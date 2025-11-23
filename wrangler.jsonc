@@ -8,5 +8,12 @@
     "binding": "ASSETS",
     "directory": ".svelte-kit/cloudflare"
   },
-  "preview_urls": true
+  "preview_urls": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "deep-sentiment-db",
+      "database_id": "f9b6b735-dd24-46c9-afcd-5e286df5d6c9"
+    }
+  ]
 }
