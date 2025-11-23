@@ -6,6 +6,7 @@ interface Topic {
   title: string;
   description: string;
   creator_address: string;
+  bounty: number | null;
   created_at: string;
 }
 
@@ -35,7 +36,7 @@ export const POST: RequestHandler = async ({ platform, request }) => {
 
   try {
     const body = await request.json();
-    const { title, description, creator_address } = body;
+    const { title, description, creator_address, bounty } = body;
 
     // Validate inputs
     if (!title || !description || !creator_address) {
@@ -59,11 +60,18 @@ export const POST: RequestHandler = async ({ platform, request }) => {
       );
     }
 
+    if (bounty !== undefined && bounty !== null && bounty < 0) {
+      return json(
+        { error: "Bounty must be a positive number" },
+        { status: 400 },
+      );
+    }
+
     // Insert the topic
     const result = await platform.env.DB.prepare(
-      "INSERT INTO topics (title, description, creator_address) VALUES (?, ?, ?) RETURNING *",
+      "INSERT INTO topics (title, description, creator_address, bounty) VALUES (?, ?, ?, ?) RETURNING *",
     )
-      .bind(title, description, creator_address)
+      .bind(title, description, creator_address, bounty || null)
       .first<Topic>();
 
     return json({ topic: result }, { status: 201 });

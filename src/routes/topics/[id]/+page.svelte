@@ -3,13 +3,7 @@ import { page } from "$app/stores";
 import { goto } from "$app/navigation";
 import { onMount } from "svelte";
 import { Button } from "$lib/components/ui/button";
-import * as Card from "$lib/components/ui/card";
-import {
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "$lib/components/ui/card";
+import TopicCard from "$lib/components/TopicCard.svelte";
 import * as Dialog from "$lib/components/ui/dialog";
 import {
   DialogContent,
@@ -31,6 +25,7 @@ interface Topic {
   title: string;
   description: string;
   creator_address: string;
+  bounty: number | null;
   created_at: string;
 }
 
@@ -41,22 +36,8 @@ let editing = $state(false);
 let editDialogOpen = $state(false);
 let editTitle = $state("");
 let editDescription = $state("");
+let editBounty = $state("");
 let topicId = $derived($page.params.id);
-
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
-
-function formatAddress(address: string) {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
 
 function isCreator() {
   const address = getConnectedAddress();
@@ -84,6 +65,7 @@ function openEditDialog() {
   if (!topic) return;
   editTitle = topic.title;
   editDescription = topic.description;
+  editBounty = topic.bounty !== null ? topic.bounty.toString() : "";
   editDialogOpen = true;
 }
 
@@ -93,12 +75,14 @@ async function updateTopic() {
 
   editing = true;
   try {
+    const bountyValue = editBounty ? parseFloat(editBounty) : null;
     const response = await fetch(`/api/topics/${topic.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: editTitle,
         description: editDescription,
+        bounty: bountyValue,
         creator_address: address,
       }),
     });
@@ -168,48 +152,18 @@ onMount(() => {
   {#if loading}
     <div class="text-center text-muted-foreground py-12">Loading topic...</div>
   {:else if !topic}
-    <Card.Root>
-      <CardContent class="py-12 text-center">
-        <p class="text-muted-foreground">Topic not found</p>
-      </CardContent>
-    </Card.Root>
+    <div class="rounded-lg border border-muted bg-muted/50 p-12 text-center">
+      <p class="text-muted-foreground">Topic not found</p>
+    </div>
   {:else}
-    <Card.Root>
-      <CardHeader>
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <CardTitle class="text-3xl mb-2">{topic.title}</CardTitle>
-            <CardDescription>
-              <div class="space-y-1">
-                <p>Created by {formatAddress(topic.creator_address)}</p>
-                <p>{formatDate(topic.created_at)}</p>
-              </div>
-            </CardDescription>
-          </div>
-
-          {#if getIsConnected() && isCreator()}
-            <div class="flex gap-2">
-              <Button
-                variant="outline"
-                onclick={openEditDialog}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="destructive"
-                onclick={deleteTopic}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </Button>
-            </div>
-          {/if}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p class="text-lg">{topic.description}</p>
-      </CardContent>
-    </Card.Root>
+    <TopicCard
+      {...topic}
+      detailed={true}
+      showActions={getIsConnected() && isCreator()}
+      onEdit={openEditDialog}
+      onDelete={deleteTopic}
+      deleting={deleting}
+    />
 
     {#if !getIsConnected()}
       <div class="rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 p-4">
@@ -265,6 +219,23 @@ onMount(() => {
         />
         <p class="text-xs text-muted-foreground text-right">
           {editDescription.length}/155
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <label for="edit-bounty" class="text-sm font-medium">
+          Bounty (ETH, optional)
+        </label>
+        <Input
+          id="edit-bounty"
+          type="number"
+          step="0.001"
+          min="0"
+          bind:value={editBounty}
+          placeholder="0.00"
+        />
+        <p class="text-xs text-muted-foreground">
+          Leave empty for no bounty
         </p>
       </div>
     </div>

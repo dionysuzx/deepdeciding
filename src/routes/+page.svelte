@@ -25,6 +25,7 @@ interface Topic {
   title: string;
   description: string;
   creator_address: string;
+  bounty: number | null;
   created_at: string;
 }
 
@@ -34,6 +35,7 @@ let dialogOpen = $state(false);
 let creating = $state(false);
 let title = $state("");
 let description = $state("");
+let bounty = $state("");
 
 async function fetchTopics() {
   try {
@@ -53,12 +55,14 @@ async function createTopic() {
 
   creating = true;
   try {
+    const bountyValue = bounty ? parseFloat(bounty) : null;
     const response = await fetch("/api/topics", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title,
         description,
+        bounty: bountyValue,
         creator_address: address,
       }),
     });
@@ -66,6 +70,7 @@ async function createTopic() {
     if (response.ok) {
       title = "";
       description = "";
+      bounty = "";
       dialogOpen = false;
       await fetchTopics();
     } else {
@@ -135,6 +140,23 @@ onMount(() => {
                         />
                         <p class="text-xs text-muted-foreground text-right">
                             {description.length}/155
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="bounty" class="text-sm font-medium">
+                            Bounty (ETH, optional)
+                        </label>
+                        <Input
+                            id="bounty"
+                            type="number"
+                            step="0.001"
+                            min="0"
+                            bind:value={bounty}
+                            placeholder="0.00"
+                        />
+                        <p class="text-xs text-muted-foreground">
+                            Leave empty for no bounty
                         </p>
                     </div>
                 </div>

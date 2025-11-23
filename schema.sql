@@ -15,5 +15,6 @@ CREATE TABLE IF NOT EXISTS topics (
   title TEXT NOT NULL CHECK(length(title) <= 50),
   description TEXT NOT NULL CHECK(length(description) <= 155),
   creator_address TEXT NOT NULL,
+  bounty REAL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

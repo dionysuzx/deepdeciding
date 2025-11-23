@@ -6,6 +6,7 @@ interface Topic {
   title: string;
   description: string;
   creator_address: string;
+  bounty: number | null;
   created_at: string;
 }
 
@@ -41,7 +42,7 @@ export const PUT: RequestHandler = async ({ platform, params, request }) => {
 
   try {
     const body = await request.json();
-    const { title, description, creator_address } = body;
+    const { title, description, creator_address, bounty } = body;
 
     if (!creator_address) {
       return json({ error: "Creator address is required" }, { status: 400 });
@@ -68,6 +69,13 @@ export const PUT: RequestHandler = async ({ platform, params, request }) => {
       );
     }
 
+    if (bounty !== undefined && bounty !== null && bounty < 0) {
+      return json(
+        { error: "Bounty must be a positive number" },
+        { status: 400 },
+      );
+    }
+
     // First check if the topic exists and if the user is the creator
     const topic = await platform.env.DB.prepare(
       "SELECT * FROM topics WHERE id = ?",
@@ -88,9 +96,9 @@ export const PUT: RequestHandler = async ({ platform, params, request }) => {
 
     // Update the topic
     const result = await platform.env.DB.prepare(
-      "UPDATE topics SET title = ?, description = ? WHERE id = ? RETURNING *",
+      "UPDATE topics SET title = ?, description = ?, bounty = ? WHERE id = ? RETURNING *",
     )
-      .bind(title, description, params.id)
+      .bind(title, description, bounty !== undefined ? bounty : null, params.id)
       .first<Topic>();
 
     return json({ topic: result });
